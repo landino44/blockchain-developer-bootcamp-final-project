@@ -1,0 +1,20 @@
+[
+  {
+    "id": 0,
+    "name": "Owner 1",
+    "picture": "images/SpaceOwner1.jpg",
+    "account": "0x0000000000000000000000000000000000000000"
+  },
+  {
+    "id": 1,
+    "name": "Owner 2",
+    "picture": "images/SpaceOwner2.jpg",
+    "account": "0x0000000000000000000000000000000000000000"
+  },
+  {
+    "id": 2,
+    "name": "Owner 3",
+    "picture": "images/SpaceOwner3.jpg",
+    "account": "0x0000000000000000000000000000000000000000"
+  }
+]

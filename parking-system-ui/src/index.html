@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+   
+    <title>Parking System</title>
+
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8 col-sm-push-2">
+          <!-- MetaMask detection and connection -->
+          <div id="mm-detected"></div>
+          <button id="mm-connect" >Connect to MetaMask</button> 
+          <div id="mm-current-account" ></div>
+          
+          <h1 class="text-center">Parking System</h1>
+
+          <hr/>
+          <br/>
+          
+        </div>
+      </div>
+      <form>
+        <h2>New Parking Space</h2>
+        <strong>Parking Space Name:</strong> 
+        <input type="text" id="space-name-input"></input>
+        <strong>Parking Address:</strong> 
+        <input type="text" id="space-address-input"></input>        
+        <button class="btn-add-space">Add new Space</button>
+      </form>
+      <hr/>
+      <br/>
+      <div id="parkingRow" class="row">
+        <!-- Parking Spaces -->
+      </div>
+
+    </div>
+
+    <div id="parkingTemplate" style="display: none;">
+      <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="panel panel-default panel-parking">
+          <div class="panel-heading">
+            <h3 class="panel-title">Parking</h3>
+          </div>
+          <div class="panel-body-space">
+            <img alt="140x140" data-src="holder.js/140x140" class="img-rounded img-center" style="width: 100%;" src="../images/ParkingSpace1.jpg" data-holder-rendered="true">
+            <br/><br/>
+            <strong>Type:</strong> <span class="parking-type">Private</span><br/>
+            <strong>Location:</strong> <span class="parking-location">Pueyrredón y Guido</span><br/>
+            <strong>Price:</strong> <span class="parking-price">10</span><br/>
+            <strong>Owner Account:</strong> <span class="owner-account">0x0000000000000000000000000000000000000000</span><br/>
+            <strong>Status:</strong> <span class="parking-status" id="status">Free</span><br/><br/>
+            <button class="btn btn-default btn-reserve" type="button" data-id="0">Reserve</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/web3.min.js"></script>
+    <script src="js/truffle-contract.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

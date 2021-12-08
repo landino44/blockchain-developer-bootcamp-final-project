@@ -1,10 +1,15 @@
 # blockchain-developer-bootcamp-final-project
 Luciano Andino's final project
 
-## **Parking in The City**
-In a city where you must pay for parking on the street, this dapp allows drivers to pay their parking time. On the other hand, it gives to the government the opportunity to receive those payments and to control that every parked car has been initiated its parking time in the dapp.
+## **Rent a Parking Space**
+This dapp allows people to rent a parking space per hour. 
+Parking lots and individuals can offer their free spaces. Ussing the app, driver will be able to seach into the free spaces close to their destination,  reserve one of them for a period of time, and paying its cost by a direct transfer to the owner.
+To simplify the problem, drivers will not be able to make a reservation for a future day. Each reservation must be for at least one hour.
 
-**Parking Areas**
+
+**Parking Space**
+Every Parking S
+
 The city is divided into different areas, which are labeled on every street, and each of them has a parking price per hour.
 
 **Government**

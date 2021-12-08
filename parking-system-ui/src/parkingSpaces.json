@@ -1,0 +1,26 @@
+[
+  {
+    "id": 0,
+    "name": "ParkingSpace1",
+    "picture": "images/ParkingSpace1.jpg",
+    "type": "Private Parking",
+    "location": "Pueyrredón y Guido",
+    "status": "Free"
+  },
+  {
+    "id": 1,
+    "name": "ParkingSpace2",
+    "picture": "images/ParkingSpace2.jpg",
+    "type": "Private Parking",
+    "location": "av. Códoba y Godoy Cruz",
+    "status": "Free"
+  },
+  {
+    "id": 2,
+    "name": "ParkingSpace3",
+    "picture": "images/ParkingSpace3.jpg",
+    "type": "Public Parking",
+    "location": "Las Heras 745",
+    "status": "Free"
+  }
+]

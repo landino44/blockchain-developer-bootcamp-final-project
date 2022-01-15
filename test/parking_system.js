@@ -40,12 +40,26 @@ contract("ParkingSystem", function (accounts ) {
     );
   });  
 
-  it("Creates a reservation and validates the result.", async function () {
+  it("Creates a reservation and validates event is emitted.", async function () {
     
     let parkingSystem = await ParkingSystem.deployed();
 
     // Makes the reservation and charges the reservation fee to the driver
     let trx = await parkingSystem.reserveParkingSpace("ParkingSpace1", {from:accounts[2], value: 1});
+    // Gets the space info
+    let event = trx.logs[0].event;
+    // Validates the space is already reserved
+    assert.equal(
+      event,
+      "ReservationCreated",
+      "Reserving a Parking Space should emit a ReservationCreated event",
+    );
+  }); 
+
+  it("Validates space is already reserved.", async function () {
+    
+    let parkingSystem = await ParkingSystem.deployed();
+
     // Gets the space info
     let info = await parkingSystem.getParkingSpaceInfoByName("ParkingSpace1");
     // Validates the space is already reserved
@@ -70,5 +84,7 @@ contract("ParkingSystem", function (accounts ) {
       false,
       "Reservation finalization failed",
     );
-  }); 
+  });
+  
+
 });

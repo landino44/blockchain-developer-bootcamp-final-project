@@ -1,67 +1,63 @@
 # blockchain-developer-bootcamp-final-project
-Luciano Andino's final project
+Luciano Andino - Final Project
 
 ## **Rent a Parking Space**
-This dapp allows people to rent a parking space per hour. 
-Parking lots and individuals can offer their free spaces. Ussing the app, driver will be able to seach into the free spaces close to their destination,  reserve one of them for a period of time, and paying its cost by a direct transfer to the owner.
-To simplify the problem, drivers will not be able to make a reservation for a future day. Each reservation must be for at least one hour.
+This dapp allows people to rent a parking space per day. 
+Parking lots and individuals can offer their free spaces. Ussing the app, driver will be able to seach into the free spaces close to their destination,  reserve one of them for a period of time, and pay its cost by a direct transfer to the owner.
+To simplify the problem, drivers will not be able to make a reservation for a future day, and each reservation must be for the whole day.
+This Dapp will have two smart contracts: ParkingSystem and ParkingReservationManager.
+ 
+**ParkingSystem**
+This is the main smart contract. It will allow owners to add their parking spaces paying a registration fee, then drivers will be able to reserve them for a day. When parking finishes, the smart contract will charge its cost and it will transfer it to the owner.
 
-
-**Parking Space**
-Every Parking S
-
-The city is divided into different areas, which are labeled on every street, and each of them has a parking price per hour.
-
-**Government**
-The government is the entity that will receive every payment, and it will charge a fine if there is a parked car without initiate its parking time in the app.
-
-**Controller**
-Controllers will verify each parked car, try to find if anyone has not been initiated its parking time in the app. If so, the controller will send the information to the government, which charge the driver with a fine.
-
-**Driver**
-Drivers has an account where they can deposit credit sending a transference to the Government. Drivers will use that credit to pay their parking time.
-Each driver will have a collection of cars, that will be represented just with an id.
+**ParkingReservationManager**
+This smart contract is in charge of saving the reservations and control their states.
+Note: This smart contract is not strictly necessary, because its behavior could be developed in ParkingSystem; but I've decided to write it just to have interaction between two smart contracts.
 
 ## **Attributes and Behavior**
-There will be 4 contracts: ParkingArea, Government, Controller, Driver.
-
-**ParkingArea**
-    Attributes
-    •	government: id of government which it belongs.
-    •	id: area name.
-    •	price: parking price for an hour. This the only that will be able to change in the future.
+**ParkingSystem**
+    Structs
+    •	ParkingSpaceOwner: it represents the owner of parking spaces. It has the account where he will receive his payments for each rent.
+    •	ParkingSpace: it has the information of the parking spaces: location, owner, parking price and its reservation status.
+   
+   Attributes
+    •	spaceOwners: a collection of ParkingSpaceOwner. 
+	•	ownerIndex: it is an id of Owners. It will increment for each owner registered in the system. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
+	•	ownersById: it is a mapping to find an Owner by its Id.
+	•	ownerIdByName: it is a mapping to find the Owner Id by its name.
+	•	enrolledOwners: to control enrolled owners.
+    •	parkingSpaces: a mapping to find space Id by its name. 
+	•	spaces: a collection of ParkingSpaces.
+	•	spaceCount: a count of spaces. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
+	•	registeredSpaces: to control registered spaces, using its name as unique key.
+	•	ownerBySpaceId: a mapping to get the owner Id by space name.	
+	•	activeReservation: a mapping to get the reservation Id by space name.
+	
     Behavior
-    •	Initialization: it will be initialized providing its three attributes. 
-    •	setPrice: it allows the Government to change the value of parking time. This method must verify the caller is the Government.
-    •	getPrice: it allows everyone to know the price of parking hour in this area. 
+    •	addParkingSpaceOwner: to register a new owner. This is used internally, when a space is registered.
+    •	isOwnerEnrolled: to know if a specific owner is already enrolled.
+    •	getOwnersQuantity: to get owners registered quantity. 
+    •	addParkingSpace: to register a new parking space. It will take the sender as the space owner. If the owner is not registered, it will create it and save it. The space registration has a fee (system fee), and it will be charged to the owner.
+    •	getSpacesQuantity: to get spaces registered quantity.
+    •	getParkingSpaceInfo: to get space information specifying a space index. 
+	•	getParkingSpaceInfoByName: to get space information specifying a space name. 
+    •	getSpacesStatus: to get statuses of every registered space.
+    •	isAReservedSpace: to know if a space is already reserved. 
+	•	reserveParkingSpace: to reserve a parking space. It will asume the driver is the sender. This operation has a fee (system fee), and it will be charged to the driver. It controls the driver is not the space owner.
+	•	finishParking: to finish a parking in progress. It controls the sender is the same driver who made the reservation, and the its state. At this time the driver will pay the parking price to the owner.
 
-**Government**
-    Attributes
-    •	parkingAreas: a collection of ParkingAreas. To simplify access, it will be a mapp having as key the ParkingArea’s id, and value the instance.
-    •	fineValues: a map of fines. Its key will be the ParkingArea’s id, and the value the fine’s amount.
-    •	registeredDrivers: a map to indicate if a driver has been registered in the app.
-    •	parkedCars: a collection of parked cars. To simplify access, it would be a map.
+**ParkingReservationManager** 
+Note: It implements Ownable of "@openzeppelin/contracts/access/Ownable.sol"
+    Structs
+    •	Reservation: the information of the reservation: space name, accounts (owner and driver), status and parking price.
+	enum
+    •	Status: to represent the reservation status: InProgress and Finished.
+   
+   Attributes
+	•	reservationIndex: to create the reservation index. It will increment for each reservation. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
+	•	reservations: a collection of created reservations.
+	
     Behavior
-    •	registerDriver: this function allows to register the sender as a driver, putting its address into the registeredDrivers map. 
-    •	
-
-**Controller**
-    Attributes
-
-    Behavior
-    •	verifyParkedCar: this function verifies if the parked car has initiated its parking time. If not, will send a message to the Government to charge the driver with a fine.
-
-**Driver**
-    Attributes
-    •	balance: it saves the driver’s credits.
-    •	cars: a collection of car’s ids. This is a map, that indicates if each car is parked or not. 
-    •	
-
-    Behavior
-    •	register: this function registers the driver in the dapp. It sends the registration to the Government. This function must be called for the owner.
-    •	addACar: this is to add a car in the cars collection. This function must be called for the owner.
-    •	addCredit: this function allows the driver to add credits in his balance. This value will be transferred to the Government. This function must be called for the owner.
-    •	starParkingTime: this function allows the driver to park one of his cars, indicating its id by a parameter. This function must be called for the owner.
-    •	stopParkingTime: it finishes the parking time, and it will transfer the amount to the Government.
-
-
+    •	getParkingReservationInfo: to get the information of the reservation.
+    •	reserveParkingSpace: to create a reservation. It controls the driver is not the space owner. 
+    •	finishParking: to finisha reservation in progress.

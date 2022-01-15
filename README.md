@@ -83,3 +83,77 @@ Note: It implements Ownable of "@openzeppelin/contracts/access/Ownable.sol"
     •	getParkingReservationInfo: to get the information of the reservation.
     •	reserveParkingSpace: to create a reservation. It controls the driver is not the space owner. 
     •	finishParking: to finisha reservation in progress.
+
+
+## Deployed version url:
+
+https://parking-system-dapp.netlify.app/
+
+## How to run this project locally:
+
+### Prerequisites
+
+- Node.js >= v16.11.1
+- Truffle and Ganache
+
+
+### Setup
+- Clone the repository in your local machine and install the dependencies
+  
+  1. `git clone https://github.com/landino44/blockchain-developer-bootcamp-final-project`
+  2. `cd blockchain-developer-bootcamp-final-project/`
+  3. `npm install`
+  4. `code . `-> Open VCode!
+ 
+### Running Test Cases
+Using command 'truffle test' executes some implemented tests:
+
+landino@LANDINO-NTB:~/blockchain-developer-bootcamp-final-project$ truffle test
+Using network 'development'.
+
+Compiling your contracts...
+===========================
+> Everything is up to date, there is nothing to compile.
+
+  Contract: ParkingReservationManager
+    ✓ should assert true (57ms)
+
+  Contract: ParkingSystem
+    ✓ Adds a Parcking Space and validates Owner Account. (1397ms)
+    ✓ Validates saved parking price. (113ms)
+    ✓ Creates a reservation and validates event is emitted. (691ms)
+    ✓ Validates space is already reserved. (195ms)
+    ✓ Finishes current reservation and validates the result. (525ms)
+
+
+  6 passing (3s)
+```
+
+### Deploy Frontend in the local environment
+
+1. Setup the blockhain network using ganache-cli
+   
+   `truffle develop` -> It creates the internal blockchain network to perform the testing
+   
+2. Migrate the contract to the network
+   `migrate`
+
+3. Execute the following command:
+   
+  `npm run dev`
+
+4. Go to http://localhost:3000
+
+
+The truffe config file is set with this parameters for the development environment:
+
+```
+  development: {
+      host:"127.0.0.1",
+      port: 8545,
+      network_id: "*" // Match any network id
+    }
+```
+
+## Screencast link
+https://www.loom.com/share/6788aa41e50e47fca7cd475aea70e905

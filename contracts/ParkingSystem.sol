@@ -10,6 +10,8 @@ import "./ParkingReservationManager.sol";
 
 contract ParkingSystem is Ownable {
   
+  
+
   struct ParkingSpaceOwner {
     uint256 id;
     string name;
@@ -24,38 +26,6 @@ contract ParkingSystem is Ownable {
     bool isReserved;     
   }
   
-  struct Driver {
-    uint256 id;
-    string name;
-    address account;
-  }
-
-  //It verifies the new owner does not already enrolled
-  modifier NotEnrolledOwner(string memory _ownerName) {
-    uint256 ownerId = ownerIdByName[_ownerName];
-    require(enrolledOwners[ownerId] == false, "User already exists." );
-    _;
-  }
-
-  //Check if exists an owner id _ownerId
-  modifier EnrolledOwner(uint256 _ownerId) {
-    //require(enrolledOwners[_ownerId], "Does not exist an Owner with provided owner id.");
-    require(true, "Does not exist an Owner with provided owner id.");
-    _;
-  }
-
-  //It verifies the new driver does not already enrolled
-  modifier NotEnrolledDriver(string memory _driverName) {
-    uint256 driverId = driverIdByName[_driverName];
-    require(enrolledDrivers[driverId] == false, "Driver already exists." );
-    _;
-  }
-
-  //Check if exists an driver id _driverId
-  modifier EnrolledDriver(uint256 _driverId) {
-    require(enrolledDrivers[_driverId], "Does not exist an Driver with provided driver id.");
-    _;
-  }
 
   //It verifies the new space has not been registered
   modifier NonExistentParkingSpace(string memory _parkingName) {
@@ -69,11 +39,6 @@ contract ParkingSystem is Ownable {
     _;
   }
 
-  modifier CorrectEnrollmentAmount() {
-    require(msg.value == enrollmentFee, "The value must be equal to the enrollment fee.");
-    _;
-  }
-
   modifier CorrectSpacePublicationAmount() {
     require(msg.value == spacePublicationFee, "The value must be equal to the space publication fee.");
     _;
@@ -84,37 +49,27 @@ contract ParkingSystem is Ownable {
     _;
   }
 
+  modifier ReservedParkingSpace(string memory _spaceName) {
+    require(spaces[parkingSpaces[_spaceName]].isReserved, "This parking space is not reserved.");
+    _;
+  }
+
   uint private constant enrollmentFee = 5;
   uint private constant spacePublicationFee = 4; 
   uint private constant reservationFee = 1;
 
 
   ///**** Owners
+  ParkingSpaceOwner[] private spaceOwners;
   //To create owner Ids
   using Counters for Counters.Counter;
     Counters.Counter private ownersIndex;
   //Owners by Id. Key: owner Id, Value: ParkingSpaceOwner
   mapping(uint256 => ParkingSpaceOwner) private ownersById;  
-  ParkingSpaceOwner[] private spaceOwners;
   //Owner name to Id
   mapping(string => uint256) ownerIdByName;
   //Allows to know if a owner is already enrolled. Key: owner Id, Value: indicates if the owner is enrolled or not 
   mapping(uint256 => bool) private enrolledOwners;
-
-  ///**** Drivers
-  //To create driver Ids
-  using Counters for Counters.Counter;
-    Counters.Counter private driversIndex;
-  //Drivers by Id. Key: driver Id, Value: Driver
-  mapping(uint256 => Driver) private driversById;  
-  //Driver name to Id
-  mapping(string => uint256) driverIdByName;
-  //Allows to know if a driver is already enrolled. Key: driver Id, Value: indicates if the driver is enrolled or not 
-  mapping(uint256 => bool) private enrolledDrivers;
-  //Cars to driver
-  mapping(string => uint256) carsToDriver;
-
-
 
   ///**** Spaces
   //Availables Parking Spaces. Key: space name, Value: the parking space
@@ -126,13 +81,13 @@ contract ParkingSystem is Ownable {
   mapping(string => bool) private registeredSpaces;
   //Allows to know easily the owner for each space
   mapping(string => uint256) private ownerBySpaceId;
-  bool[] spacesStatus;
+
+  //Reservation
+  mapping(string => uint256) private activeReservation;
 
   //**** Events
   event OwnerRegistered(string _ownerName, address _ownerAccount, uint256 _ownerId);
   event SpaceAdded(string _spaceName, uint256 _ownerId, string _locationAddress, uint _price, address _ownerAccount);
-  event DriverAdded(string _driverName, address _driverAccount);
-  event CarAdded(string _carId, uint256 _driverId);
   event ReservationCreated(string _spaceName, uint256 reserveId);
 
   ParkingReservationManager private reservationMgr;
@@ -141,7 +96,7 @@ contract ParkingSystem is Ownable {
       reservationMgr = new ParkingReservationManager();
   }
 
-  function addParkingSpaceOwner(string memory _ownerName, address _spaceOwnerAccount) public returns (uint256){
+  function addParkingSpaceOwner(string memory _ownerName, address _spaceOwnerAccount) public returns (uint256) {
 
     uint256 ownerId = ownerIdByName[_ownerName];
     if(!enrolledOwners[ownerId]){// Is a new Owner
@@ -175,31 +130,38 @@ contract ParkingSystem is Ownable {
    
     return (ownersById[_ownerId - 1].name, ownersById[_ownerId - 1].account);
   }
-  function addParkingSpace(string memory _spaceName, uint256 _ownerId, string memory _locationAddress, uint _price) public EnrolledOwner(_ownerId) NonExistentParkingSpace(_spaceName) CorrectSpacePublicationAmount payable {
+  function addParkingSpace(string memory _spaceName, string memory _locationAddress, uint _price) public NonExistentParkingSpace(_spaceName) CorrectSpacePublicationAmount payable {
+    address ownerAccount = msg.sender;
+    string memory ownerName = toString(ownerAccount);
+    uint256 ownerId = ownerIdByName[ownerName];
+
+    if(!enrolledOwners[ownerId]){
+
+      ownerId = addParkingSpaceOwner(ownerName, ownerAccount);
+    }
     
     //Adds a new Parking Space
     spaces.push(ParkingSpace({
                               name: _spaceName,
                               locationAddress: _locationAddress,
-                              ownerId: _ownerId,
+                              ownerId: ownerId,
                               price: _price,
                               isReserved: false 
                             })
                );
     parkingSpaces[_spaceName] = spaceCount.current();
-    spacesStatus.push(false);
     spaceCount.increment();
 
     registeredSpaces[_spaceName] = true;
-    ownerBySpaceId[_spaceName] = _ownerId;
+    ownerBySpaceId[_spaceName] = ownerId;
 
     // Take the publication fee
     (bool sent, ) = address(owner()).call{value: msg.value}("");
     require(sent, "Transaction Failed");
 
-    ParkingSpaceOwner memory spaceOwner = ownersById[_ownerId];
+    ParkingSpaceOwner memory spaceOwner = ownersById[ownerId];
 
-    emit SpaceAdded(_spaceName, _ownerId, _locationAddress, _price, spaceOwner.account);
+    emit SpaceAdded(_spaceName, ownerId, _locationAddress, _price, spaceOwner.account);
   }
 
   function getSpacesQuantity() public view returns (uint256){
@@ -211,7 +173,7 @@ contract ParkingSystem is Ownable {
                                                                 uint price, 
                                                                 bool isReserved, 
                                                                 uint256 ownerId, 
-                                                                string memory ownerAccount) {
+                                                                address ownerAccount) {
 
     ParkingSpace memory space = spaces[_index];
     address account = ownersById[space.ownerId].account;                                                                  
@@ -221,69 +183,93 @@ contract ParkingSystem is Ownable {
             space.price,
             space.isReserved,
             space.ownerId,
-            toString(abi.encodePacked(account))
+            account
            );
   }
 
-  function getSpacesStatus() public view returns (bool[] memory) {
+  function getParkingSpaceInfoByName(string memory _spaceName) public view returns (string memory name, 
+                                                                string memory locationAddress, 
+                                                                uint price, 
+                                                                bool isReserved, 
+                                                                uint256 ownerId, 
+                                                                address ownerAccount) {
+    return getParkingSpaceInfo(parkingSpaces[_spaceName]);                                                                
+  }
 
+  function getSpacesStatus() public view returns (bool[] memory) {
+    bool[] memory spacesStatus;
+
+    for(uint i = 0; i < spaceCount.current() ; i++){
+
+      spacesStatus[i] = spaces[i].isReserved;
+    }
     return spacesStatus;
   }
 
-  function addDriver(string memory _driverName, address _driverAccount) public NotEnrolledDriver(_driverName) CorrectEnrollmentAmount payable {
+  function isAReservedSpace(string memory _spaceName) public view returns (bool) {
 
-    // Increments drivers index an gets the current id
-    driversIndex.increment();
-    uint256 driverId = driversIndex.current();
-    
-    driverIdByName[_driverName] = driverId;
-    
-    driversById[driverId] = Driver({
-                                      id: driverId,
-                                      name: _driverName,
-                                      account: _driverAccount
-                                  });
-    enrolledDrivers[driverId] = true;
-
-    // Take the driver enrollment fee
-    (bool sent, ) = address(owner()).call{value: msg.value}("");
-    require(sent, "Transaction Failed");    
-
-    emit DriverAdded(_driverName, _driverAccount);
-    
+    return spaces[parkingSpaces[_spaceName]].isReserved;
   }
-
-  function addCar(string memory _carId, uint256 _driverId) public EnrolledDriver(_driverId){
-    
-    carsToDriver[_carId] = _driverId;
-
-    emit CarAdded(_carId, _driverId);
-
-  }
-
    
   function reserveParkingSpace(string memory _spaceName) public payable {
+
+    bool sent;
 
       // find a parkingSpace with _spaceName
       require(registeredSpaces[_spaceName], "There is no a Parking Space with the specified name.");
 
-      // mark the space as busy
-      spaces[parkingSpaces[_spaceName]].isReserved = true;
-
       // Owner id
       uint256 ownerId = spaces[parkingSpaces[_spaceName]].ownerId;
-
       // find the space owner
       ParkingSpaceOwner  memory spaceOwner = ownersById[ownerId];
 
       // create a rervation
-      uint256 reservationId =  reservationMgr.reserveParkingSpace(_spaceName, spaceOwner.account, msg.sender);
+      uint256 reservationId =  reservationMgr.reserveParkingSpace(_spaceName, 
+                                                                  spaceOwner.account, 
+                                                                  msg.sender, 
+                                                                  spaces[parkingSpaces[_spaceName]].price
+                                                                 );
 
       // get the reservation fee
-      (bool sent, ) = address(owner()).call{value: msg.value}("");
-      require(sent, "Transaction Failed");   
+      (sent, ) = address(owner()).call{value: reservationFee}("");
+      require(sent, "Fee Payment - Transaction Failed");   
+
+      // mark the space as busy
+      spaces[parkingSpaces[_spaceName]].isReserved = true;      
+      // save de reservation Id
+      activeReservation[_spaceName] = reservationId;
 
       emit ReservationCreated(_spaceName, reservationId);
+  }
+
+  function finishParking(string memory _spaceName) public payable ReservedParkingSpace(_spaceName) {
+
+      bool sent;
+      address ownerAccount;
+      address driverAccount;
+      uint256 parkingValue;
+
+      uint256 reservationId = activeReservation[_spaceName];
+
+      // Gets reservationInfo
+      ( , ownerAccount, driverAccount, , parkingValue) = reservationMgr.getParkingReservationInfo(reservationId);
+
+      // Validates sender is the reservation driver
+      require(driverAccount == msg.sender, "Driver only can finish his own rereservations");
+
+      // Charges the parking cost to the driver and gives to the space owner
+      (sent, ) = ownerAccount.call{value: parkingValue}("");
+      require(sent, "Parking Cost Payment - Transaction Failed"); 
+
+      // Finishes the reservation
+      reservationMgr.finishParking(reservationId);
+
+      // mark the space as free
+      spaces[parkingSpaces[_spaceName]].isReserved = false;
+
+      // clear reservationId for current space
+      activeReservation[_spaceName] = 0;
+
   }
 
   function toString(address account) private pure returns(string memory) {

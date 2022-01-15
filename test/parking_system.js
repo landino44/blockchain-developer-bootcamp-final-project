@@ -10,44 +10,65 @@ const ParkingSystem = artifacts.require("ParkingSystem");
  * See docs: https://www.trufflesuite.com/docs/truffle/testing/writing-tests-in-javascript
  */
 contract("ParkingSystem", function (accounts ) {
-  it("should assert true", async function () {
+  it("Adds a Parcking Space and validates Owner Account.", async function () {
     
-    const parkingSystem = await ParkingSystem.deployed();
+    let parkingSystem = await ParkingSystem.deployed();
 
-    console.log("AGREGA EL OWNER");
-    const trx = await parkingSystem.addParkingSpaceOwner( "Owner1", accounts[0] );
-    //console.log(trx);
-    //console.log(trx.logs[0].args._ownerId.toNumber());
-    const ownerId = trx.logs[0].args._ownerId;
-    //console.log(ownerId);
-    const ownerAccount = trx.logs[0].args._ownerAccount;
-    console.log("CUENTA DEL OWNER: ");
-    console.log(ownerAccount);
-    //const isEnrolled = parkingSystem.isOwnerEnrolled("Owner1");
-    //console.log(isEnrolled);
-    console.log("AGREGA EL ESTACIONAMIENTO");
-    const trx2 = await parkingSystem.addParkingSpace("ParkingSpace1", ownerId, "Pueyrredón y Guido", 15, {value: 4});
-    console.log("CUENTA DEL ORDEN USADA EN EL ESTACIONAMIENTO: ");
-    console.log(trx2.logs[0].args._ownerAccount);
-    //await parkingSystem.reserveParkingSpace("ParkingSpace1"); 
-    console.log("PIDE DATOS DE LOS ESTACIONAMIENTOS");
-    const result = await parkingSystem.getParkingSpaceInfo(0);
-    console.log("RESULTADO DE LA BÚSQUEDA: ");
-    console.log(result[0]);
-    console.log(result[1]);
-    console.log(result[2].toNumber());
-    console.log(result[3]);
-    console.log(result[4].toNumber());
-    console.log(result[5]);
+    // Adds a new Parking space and charges registration fee
+    let trx = await parkingSystem.addParkingSpace("ParkingSpace1", "Pueyrredón y Guido", 15, {from: accounts[1], value: 4});
 
-
-  
-
-    /*
+    let ownerAccount = trx.logs[0].args._ownerAccount;
+    // Validates the registered account of the space owner, is correct
     assert.equal(
-      isEnrolled,
-      true,
-      "Owner1 is not already enrolled.",
-    );*/
+      accounts[1],
+      ownerAccount,
+      "The Owner Account is not correct",
+    );
   });
+
+  it("Validates saved parking price.", async function () {
+    
+    let parkingSystem = await ParkingSystem.deployed();
+    // Gets registered space info
+    let info = await parkingSystem.getParkingSpaceInfoByName("ParkingSpace1");
+
+    // Validates the registered price is correct
+    assert.equal(
+      info.price.toNumber(),
+      15,
+      "Saved parking price is not correct",
+    );
+  });  
+
+  it("Creates a reservation and validates the result.", async function () {
+    
+    let parkingSystem = await ParkingSystem.deployed();
+
+    // Makes the reservation and charges the reservation fee to the driver
+    let trx = await parkingSystem.reserveParkingSpace("ParkingSpace1", {from:accounts[2], value: 1});
+    // Gets the space info
+    let info = await parkingSystem.getParkingSpaceInfoByName("ParkingSpace1");
+    // Validates the space is already reserved
+    assert.equal(
+      info.isReserved,
+      true,
+      "Reservation failed",
+    );
+  }); 
+
+  it("Finishes current reservation and validates the result.", async function () {
+    
+    let parkingSystem = await ParkingSystem.deployed();
+
+    // Finishes current reservation and charges the its cost to the driver
+    let trx = await parkingSystem.finishParking("ParkingSpace1", {from:accounts[2], value: 15});
+    // Gets the space info
+    let info = await parkingSystem.getParkingSpaceInfoByName("ParkingSpace1");
+    // Validates the space is already reserved
+    assert.equal(
+      info.isReserved,
+      false,
+      "Reservation finalization failed",
+    );
+  }); 
 });

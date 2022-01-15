@@ -10,19 +10,24 @@
     <!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
 
+    <style>
+     
+      form {
+        background-color: #dde1e2;
+      }
+      
+      </style> 
   </head>
   <body>
     <div class="container">
       <div class="row">
-        <div class="col-xs-12 col-sm-8 col-sm-push-2">
+        <div >
           <!-- MetaMask detection and connection -->
           <div id="mm-detected"></div>
           <button id="mm-connect" >Connect to MetaMask</button> 
-          <div id="mm-current-account" ></div>
-          
-          <h1 class="text-center">Parking System</h1>
-
+          <div id="mm-current-account"></div>
           <hr/>
+          <h1 class="text-center"><b>Parking System</b></h1>
           <br/>
           
         </div>
@@ -32,15 +37,21 @@
         <strong>Parking Space Name:</strong> 
         <input type="text" id="space-name-input"></input>
         <strong>Parking Address:</strong> 
-        <input type="text" id="space-address-input"></input>        
+        <input type="text" id="space-address-input"></input> 
+        <strong>Parking Price:</strong> 
+        <input type="number" id="space-price-input"></input>       
         <button class="btn-add-space">Add new Space</button>
+        <br/>
+        <br/>
       </form>
       <hr/>
+      <br/>
+      <h2>Parking Spaces</h2>
       <br/>
       <div id="parkingRow" class="row">
         <!-- Parking Spaces -->
       </div>
-
+      <hr/>
     </div>
 
     <div id="parkingTemplate" style="display: none;">

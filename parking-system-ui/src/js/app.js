@@ -62,20 +62,22 @@ App = {
     $(document).on('click', '.btn-add-space', App.handleAddSpace);
   },
 
-  markReserved: function() {
+  updateButtonLabel: function(spaceName) {
     App.contracts.ParkingSystem.deployed().then(function(instance) {
       
       parkingSystemInstance = instance;
-       return parkingSystemInstance.getSpacesStatus.call();
+      return parkingSystemInstance.getParkingSpaceInfoByName.call(spaceName); 
       
-    }).then(function(spaces) {
-      for (i = 0; i < spaces.length; i++) {
-        if (spaces[i]) {
-          var parent = $('.panel-body[data-id="' +  i  + '"]');
-          parent.find("span.status").text();
-          parent.find("button").text("cancel");
-        }
+    }).then(function(result) {
+      
+      var parent = $('.panel-body[data-id="' +  spaceName  + '"]');
+      if(result[3]){
+        parent.find("button").text("Finish");
+      } else {
+        parent.find("button").text("Reserve");
       }
+      
+      
     }).catch(function(err) {
       console.log(err.message);
     });
@@ -94,9 +96,11 @@ App = {
         return parkingSystemInstance.getSpacesQuantity.call(); 
 
       }).then(function(quantity){
+
         var parkingRow = $('#parkingRow');
         var parkingTemplate = $('#parkingTemplate');
         var imgIdx = 0;
+
         for (i = 0; i < quantity.toNumber(); i++) {
 
           parkingSystemInstance.getParkingSpaceInfo.call(i).then(function(info){
@@ -112,9 +116,10 @@ App = {
             parkingTemplate.find('img').attr('src', "../images/ParkingSpace" + imgIdx + ".jpg");
             parkingTemplate.find('.parking-location').text(info[1]);
             parkingTemplate.find('.parking-price').text(info[2].toNumber());
-            parkingTemplate.find('.owner-account').text(info[5]);
+            let result = info[5].substring(0, 7) + "..." + info[5].substring(32, 42);
+            parkingTemplate.find('.owner-account').text(result);
             parkingTemplate.find('.parking-status').text((info[3])?"Reserved":"Free");
-            parkingTemplate.find('.btn-reserve').attr('data-id', info[0]).text("Reserve");
+            parkingTemplate.find('.btn-reserve').attr('data-id', info[0]).text(!(info[3])?"Reserve":"Finish");
 
             parkingRow.append(parkingTemplate.html());
           }).catch(function(err) {
@@ -128,7 +133,7 @@ App = {
 
   handleReserve: function(event) {
     event.preventDefault();
-    var spaceId = $(event.target).data('id');
+    var spaceName = $(event.target).data('id');
     var parkingSystemInstance;
 
     web3.eth.getAccounts(function(error, accounts) {
@@ -139,19 +144,30 @@ App = {
       App.contracts.ParkingSystem.deployed().then(function(instance) {
         parkingSystemInstance = instance;
     
-        // Execute reservation as a transaction by sending account
-        return parkingSystemInstance.reserveParkingSpace(spaceId, {from:ethereum.selectedAddress}); 
+          return parkingSystemInstance.getParkingSpaceInfoByName.call(spaceName); 
+
+      }).then(function(space){
+          
+        if(space[3]) { // is a reserved space
+            var price = space[2].toNumber(); //reservation price
+            return parkingSystemInstance.finishParking(spaceName, {from: ethereum.selectedAddress, value: price});
+          }
+          
+          return parkingSystemInstance.reserveParkingSpace(spaceName, {from: ethereum.selectedAddress, value: reservationFee}); 
       }).then(function(result) {
-        return App.markReserved();
+
+        document.getElementById("parkingRow").innerHTML = "";
+        return App.readSpaces();
       }).catch(function(err) {
         console.log(err.message);
+        window.alert(getErrorMessage(err.message));
       });
     });
   },
 
   handleAddSpace: function(event) {
     event.preventDefault();
-    var spaceId = $(event.target).data('id');
+
     var parkingSystemInstance;
     web3.eth.getAccounts(function(error, accounts) {
       if (error) {
@@ -161,16 +177,17 @@ App = {
       App.contracts.ParkingSystem.deployed().then(function(instance) {
         parkingSystemInstance = instance;
     
-        // Execute reservation as a transaction by sending account
-        return parkingSystemInstance.addParkingSpaceOwner.call(ethereum.selectedAddress.toString(), ethereum.selectedAddress); 
-        
-      }).then(function(result) {
-        var ownerId = result.toNumber();
         var spaceName = document.getElementById("space-name-input").value;
         var spaceAddress = document.getElementById("space-address-input").value;
-        //var ownerAccount = result.logs[0].args._spaceOwnerAccount;
-        return parkingSystemInstance.addParkingSpace(spaceName, ownerId, spaceAddress, 15,{from: ethereum.selectedAddress,value: spacePublicationFee});
+        var spacePrice = document.getElementById("space-price-input").value;
+        
+        return parkingSystemInstance.addParkingSpace(spaceName, spaceAddress, spacePrice,{from: ethereum.selectedAddress,value: spacePublicationFee});
       }).then(function(result) {
+        document.getElementById("space-name-input").value = "";
+        document.getElementById("space-address-input").value = "";
+        document.getElementById("space-price-input").value = "";
+        document.getElementById("parkingRow").innerHTML = "";
+
         return App.readSpaces();
       }).catch(function(err) {
         console.log(err.message);
@@ -182,14 +199,14 @@ App = {
 
 // Detect wallet is already intalled
 window.addEventListener('load', function(){
+  let mmDetected = document.getElementById('mm-detected')
   if(typeof ethereum !== 'undefined'){
       console.log('Wallet detected')
-      let mmDetected = document.getElementById('mm-detected')
-     
-      mmDetected.innerHTML = "MetaMask has been detected"
+      mmDetected.innerHTML = "<p style='color:green'> MetaMask has been detected <b/>"
   }
   else {
       console.log('There is no Wallet available')
+      mmDetected.innerHTML = "<p style='color:red'> There is no Wallet available <p/>"
       this.alert("You need to install a Wallet")
   }
 })
@@ -204,6 +221,20 @@ mmEnabled.onclick = async () => {
   const mmCurrectAccount = document.getElementById('mm-current-account');
 
   mmCurrectAccount.innerHTML = "Current account: " + ethereum.selectedAddress
+}
+
+function getErrorMessage(msg) {
+  var idx = msg.search("reason");
+  if(idx >= 0){
+    var res = msg.substring(idx + 9, idx + 100);
+    idx = res.search("}");
+    if(idx >=0){
+      res = res.substring(0, idx - 1);
+      return res;
+    }
+    return res;
+  }
+  return msg;
 }
 
 $(function() {

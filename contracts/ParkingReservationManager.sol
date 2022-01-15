@@ -13,11 +13,8 @@ contract ParkingReservationManager is Ownable{
   mapping(uint256 => Reservation) private reservations;
 
   enum Status {
-    Registered,
     InProgress,
-    Cancelled,
-    Finished,
-    Payed
+    Finished
   }
 
   struct Reservation {
@@ -25,17 +22,7 @@ contract ParkingReservationManager is Ownable{
     address ownerAccount;
     address driverAccount;
     Status status;
-  }
-
-  modifier Registered(uint256 _reservationId){
-    require(reservations[_reservationId].status == Status.Registered, "Invalid reservation status.");
-    _;
-  }
-
-  modifier AvailableToCancel(uint256 _reservationId){
-    Status status = reservations[_reservationId].status;
-    require(status == Status.Registered || status == Status.InProgress, "Invalid reservation status.");
-    _;
+    uint256 value;
   }
 
   modifier AvailableToFinish(uint256 _reservationId){
@@ -44,38 +31,49 @@ contract ParkingReservationManager is Ownable{
     _;
   }
 
+  modifier OwnerCannotReserve(address _ownerAccount, address _driverAccount){
+    require(_ownerAccount != _driverAccount, "Owner cannot reserve his own space");
+    _;
+  }
+
   constructor() {
     
   }
 
-  function reserveParkingSpace(string memory _spaceName, address _ownerAccount, address _driverAccount) public onlyOwner returns (uint256) {
+  function getParkingReservationInfo(uint256 _reservationId) public view returns ( string memory spaceName,
+                                                                                    address ownerAccount,
+                                                                                    address driverAccount,
+                                                                                    Status status,
+                                                                                    uint256 value) {
+
+    Reservation memory res = reservations[_reservationId];
+
+    return (res.spaceName,
+            res.ownerAccount,
+            res.driverAccount,
+            res.status,
+            res.value
+           );
+  }
+
+
+  function reserveParkingSpace(string memory _spaceName, address _ownerAccount, address _driverAccount, uint256 _value) public onlyOwner OwnerCannotReserve(_ownerAccount, _driverAccount) returns (uint256) {
 
     reservationIndex.increment();
     reservations[reservationIndex.current()] = Reservation({
       spaceName: _spaceName,
       ownerAccount: _ownerAccount,
       driverAccount: _driverAccount,
-      status: Status.Registered
+      status: Status.InProgress,
+      value: _value
     });
 
     return reservationIndex.current();
   }
 
-  function startParking(uint _reservationId) public Registered(_reservationId) onlyOwner{
-
-    reservations[_reservationId].status = Status.InProgress;
-  }
-
-  function cancelParking(uint _reservationId) public AvailableToCancel(_reservationId) onlyOwner{
-
-    reservations[_reservationId].status = Status.Cancelled;
-    //falta impactar algun fee por la cancelación
-  }
-
-    function finishParking(uint _reservationId) public AvailableToFinish(_reservationId) onlyOwner{
+  function finishParking(uint _reservationId) public onlyOwner{
 
     reservations[_reservationId].status = Status.Finished;
-    //falta impactar el pago
   }
 
 }

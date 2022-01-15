@@ -105,26 +105,23 @@ https://parking-system-dapp.netlify.app/
   3. `npm install`
   4. `code . `-> Open VCode!
  
-### Running Test Cases
-Using command 'truffle test' executes some implemented tests:
 
-landino@LANDINO-NTB:~/blockchain-developer-bootcamp-final-project$ truffle test
-Using network 'development'.
+## Test
 
-Compiling your contracts...
-===========================
-> Everything is up to date, there is nothing to compile.
-
-  Contract: ParkingReservationManager
-    ✓ should assert true (57ms)
-
+The contract test can be executed with:
+```
+truffle tests
+```
+or
+```
+npm test
+```
   Contract: ParkingSystem
     ✓ Adds a Parcking Space and validates Owner Account. (1397ms)
     ✓ Validates saved parking price. (113ms)
     ✓ Creates a reservation and validates event is emitted. (691ms)
     ✓ Validates space is already reserved. (195ms)
     ✓ Finishes current reservation and validates the result. (525ms)
-
 
   6 passing (3s)
 ```
@@ -156,4 +153,4 @@ The truffe config file is set with this parameters for the development environme
 ```
 
 ## Screencast link
-https://www.loom.com/share/6788aa41e50e47fca7cd475aea70e905
+

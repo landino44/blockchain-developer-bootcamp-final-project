@@ -61,17 +61,23 @@ Note: This smart contract is not strictly necessary, because its behavior could 
 	•	finishParking: to finish a parking in progress. It controls the sender is the same driver who made the reservation, and the its state. At this time the driver will pay the parking price to the owner.
 
 **ParkingReservationManager** 
+
 Note: It implements Ownable of "@openzeppelin/contracts/access/Ownable.sol"
-    Structs
+
+    Structs:
+    
     •	Reservation: the information of the reservation: space name, accounts (owner and driver), status and parking price.
 	enum
     •	Status: to represent the reservation status: InProgress and Finished.
    
-   Attributes
+   Attributes:
+   
 	•	reservationIndex: to create the reservation index. It will increment for each reservation. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
+	
 	•	reservations: a collection of created reservations.
 	
-    Behavior
+    Behavior:
+    
     •	getParkingReservationInfo: to get the information of the reservation.
     •	reserveParkingSpace: to create a reservation. It controls the driver is not the space owner. 
     •	finishParking: to finisha reservation in progress.

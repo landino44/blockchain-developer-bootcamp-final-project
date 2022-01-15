@@ -24,6 +24,7 @@ Note: This smart contract is not strictly necessary, because its behavior could 
    
   Attributes:
   
+   •	ParkingSpaceOwner: it represents the owner of parking spaces. It has the account where he will receive his payments for each rent.
   •	spaceOwners: a collection of ParkingSpaceOwner. 
   •	ownerIndex: it is an id of Owners. It will increment for each owner registered in the system. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
   •	ownersById: it is a mapping to find an Owner by its Id.

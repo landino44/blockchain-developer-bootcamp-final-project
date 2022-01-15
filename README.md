@@ -125,13 +125,14 @@ npm test
     ✓ Creates a reservation and validates event is emitted. (691ms)
 
     ✓ Validates space is already reserved. (195ms)
-    
+
     ✓ Finishes current reservation and validates the result. (525ms)
 
   6 passing (3s)
 ```
 
-### Deploy Frontend in the local environment
+
+## Deploy Frontend in the local environment
 
 1. Setup the blockhain network using ganache-cli
    

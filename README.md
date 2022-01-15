@@ -16,6 +16,7 @@ Note: This smart contract is not strictly necessary, because its behavior could 
 
 ## **Attributes and Behavior**
 **ParkingSystem**
+
   Structs
     	•	ParkingSpaceOwner: it represents the owner of parking spaces. It has the account where he will receive his payments for each rent.
     	•	ParkingSpace: it has the information of the parking spaces: location, owner, parking price and its reservation status.

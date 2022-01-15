@@ -160,4 +160,4 @@ The truffe config file is set with this parameters for the development environme
 ```
 
 ## Screencast link
-
+https://www.loom.com/share/4e161cb6919d494ba46603b6657057f8

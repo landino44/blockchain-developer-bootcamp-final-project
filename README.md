@@ -15,7 +15,7 @@ This smart contract is in charge of saving the reservations and control their st
 Note: This smart contract is not strictly necessary, because its behavior could be developed in ParkingSystem; but I've decided to write it just to have interaction between two smart contracts.
 
 ## **Attributes and Behavior**
-**ParkingSystem**
+**ParkingSystem
     Structs
     •	ParkingSpaceOwner: it represents the owner of parking spaces. It has the account where he will receive his payments for each rent.
     •	ParkingSpace: it has the information of the parking spaces: location, owner, parking price and its reservation status.

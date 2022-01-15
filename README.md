@@ -67,7 +67,8 @@ Note: It implements Ownable of "@openzeppelin/contracts/access/Ownable.sol"
     Structs:
     
     •	Reservation: the information of the reservation: space name, accounts (owner and driver), status and parking price.
-	enum
+    
+    Enum:
     •	Status: to represent the reservation status: InProgress and Finished.
    
    Attributes:

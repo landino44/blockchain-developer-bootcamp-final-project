@@ -71,9 +71,7 @@ Note: It implements Ownable of "@openzeppelin/contracts/access/Ownable.sol"
     •	Status: to represent the reservation status: InProgress and Finished.
    
    Attributes:
-   
-	•	reservationIndex: to create the reservation index. It will increment for each reservation. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
-	
+   	•	reservationIndex: to create the reservation index. It will increment for each reservation. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
 	•	reservations: a collection of created reservations.
 	
     Behavior:

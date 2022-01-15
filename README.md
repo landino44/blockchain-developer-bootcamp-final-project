@@ -130,9 +130,10 @@ npm test
 
   6 passing (3s)
 ```
+```
+```
 
-
-## Deploy Frontend in the local environment
+### Deploy Frontend in the local environment
 
 1. Setup the blockhain network using ganache-cli
    

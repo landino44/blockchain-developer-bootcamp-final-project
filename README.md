@@ -29,16 +29,25 @@ Note: This smart contract is not strictly necessary, because its behavior could 
   •	ownerIndex: it is an id of Owners. It will increment for each owner registered in the system. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
   
   •	ownersById: it is a mapping to find an Owner by its Id.
+  
   •	ownerIdByName: it is a mapping to find the Owner Id by its name.
+  
   •	enrolledOwners: to control enrolled owners.
+  
   •	parkingSpaces: a mapping to find space Id by its name. 
+  
   •	spaces: a collection of ParkingSpaces.
+  
   •	spaceCount: a count of spaces. Note: to implement this, I've used Conters.Counter of "@openzeppelin/contracts/utils/Counters.sol".
+  
   •	registeredSpaces: to control registered spaces, using its name as unique key.
+  
   •	ownerBySpaceId: a mapping to get the owner Id by space name.	
+  
   •	activeReservation: a mapping to get the reservation Id by space name.
 	
-    Behavior
+    Behavior:
+    
     •	addParkingSpaceOwner: to register a new owner. This is used internally, when a space is registered.
     •	isOwnerEnrolled: to know if a specific owner is already enrolled.
     •	getOwnersQuantity: to get owners registered quantity. 

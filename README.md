@@ -117,10 +117,15 @@ or
 npm test
 ```
   Contract: ParkingSystem
+
     ✓ Adds a Parcking Space and validates Owner Account. (1397ms)
+
     ✓ Validates saved parking price. (113ms)
+
     ✓ Creates a reservation and validates event is emitted. (691ms)
+
     ✓ Validates space is already reserved. (195ms)
+    
     ✓ Finishes current reservation and validates the result. (525ms)
 
   6 passing (3s)
